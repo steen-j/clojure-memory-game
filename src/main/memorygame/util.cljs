@@ -9,8 +9,7 @@
 (defn randomize-cards "Return a randomized list of the cards" [number-of-cards]
   (->> (range 1 (inc number-of-cards))
        (mapcat #(list % %))
-       (shuffle))
-  )
+       (shuffle)))
 
 ;(defn create-uuid []
 ;#?(:clj  (java.util.UUID/randomUUID)
@@ -22,5 +21,4 @@
 (defn setup-new-game "Creates a map of the randomized cards" [number-of-different-cards]
   (->> (randomize-cards number-of-different-cards)
        (map (fn [i] (let [id (create-uuid)] {id {:id id :image i :transform #{} :classes #{}}})))
-       (into {})
-       ))
+       (into {})))

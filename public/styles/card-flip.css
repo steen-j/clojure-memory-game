@@ -60,3 +60,9 @@
 .hidden {
   visibility: hidden;
 }
+
+.control-area {
+  border-radius: 25px;
+  background-color: #ccc;
+  padding: 25px;
+}
