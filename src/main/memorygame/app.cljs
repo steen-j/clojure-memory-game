@@ -28,10 +28,12 @@
 (defn flip-first-card [id]
       (toggle-element-in-set id :transform flip-style)
       (reset! first-card id))
+
 (defn swap-player! []
       (if (= :player-one @current-player)
         (reset! current-player :player-two)
         (reset! current-player :player-one)))
+
 (defn increase-score-for-current-player! []
       (if (= :player-one @current-player)
         (swap! player-one-score inc)
@@ -43,7 +45,15 @@
            (if (= (get-in @cards [card :image]) (get-in @cards [id :image]))
              (do
                (increase-score-for-current-player!)
-               (js/setTimeout #(hide-cards card id) 1000))
+               (js/setTimeout #(hide-cards card id) 1000)
+               (when (= (+ @player-one-score @player-two-score) number-of-different-cards)
+                     (js/setTimeout
+                       #(js/alert (str
+                                    (cond
+                                      (< @player-two-score @player-one-score) "Player 1"
+                                      (< @player-one-score @player-two-score) "Player 2"
+                                      :else "Ingen") " vandt!"
+                                    )) 1500)))
              (do
                (swap-player!)
                (js/setTimeout #(flip-cards-back card id) 1000)))
@@ -56,15 +66,15 @@
               (flip-first-card id)
               (flip-second-card id))))
 
-(def base-skin (fn [{:keys [id image transform classes]} image-postfix]
-                   [:div {:class :col}
-                    [:div {:class    (into '(:flip-card) classes)
-                           :on-click #(select-card id)}
-                     [:div {:class :flip-card-inner :style {:transform transform}}
-                      [:div {:class :flip-card-front}
-                       [:img {:src (str "images/halloween-background" image-postfix ".png")}]]
-                      [:div {:class :flip-card-back}
-                       [:img {:src (str "images/halloween-" image image-postfix ".png")}]]]]]))
+(defn base-skin [{:keys [id image transform classes] :as card} image-postfix]
+      [:div {:class :col}
+       [:div {:class    (into '(:flip-card) classes)
+              :on-click #(select-card id)}
+        [:div {:class :flip-card-inner :style {:transform transform}}
+         [:div {:class :flip-card-front}
+          [:img {:src (str "images/halloween-background" image-postfix ".png")}]]
+         [:div {:class :flip-card-back}
+          [:img {:src (str "images/halloween-" image image-postfix ".png")}]]]]])
 
 (def halloween-skin (fn [card] (base-skin card "")))
 
