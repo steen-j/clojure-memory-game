@@ -6,6 +6,7 @@
     border: 1px solid #f1f1f1;
     display: flex;
     cursor: pointer;
+    perspective: 1000px;
   }
   
   /* This container is needed to position the front and back side */
@@ -27,7 +28,6 @@
     position: absolute;
     width: 276px;
     height: 181px;
-    -webkit-backface-visibility: hidden; /* Safari */
     backface-visibility: hidden;
   }
   
