@@ -4,16 +4,8 @@
     <link rel="stylesheet" href="styles/card-flip.css">
 </head>
 <body>
-<script>
-    function flipCard(elem) {
-        elem.style.transform='rotateY(180deg)';
-    }
-    function flipBack(elem) {
-        elem.style.transform='';
-    }
-</script>
 <div class="col">
-    <div class="flip-card" onmouseover="flipCard(this)" onmouseout="flipBack(this)">
+    <div class="flip-card">
         <div class="flip-card-inner">
             <div class="flip-card-front"><img src="images/halloween-background.png"></div>
             <div class="flip-card-back"><img src="images/halloween-8.png"></div>
