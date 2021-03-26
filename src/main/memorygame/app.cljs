@@ -29,13 +29,13 @@
       (toggle-element-in-set id :transform flip-style)
       (reset! first-card id))
 
-(defn swap-player! []
-      (if (= :player-one @current-player)
+(defn swap-player! [whos-up]
+      (if (= :player-one whos-up)
         (reset! current-player :player-two)
         (reset! current-player :player-one)))
 
-(defn increase-score-for-current-player! []
-      (if (= :player-one @current-player)
+(defn increase-score-for-player! [whos-up]
+      (if (= :player-one whos-up)
         (swap! player-one-score inc)
         (swap! player-two-score inc)))
 
@@ -44,7 +44,7 @@
            (toggle-element-in-set id :transform flip-style)
            (if (= (get-in @cards [card :image]) (get-in @cards [id :image]))
              (do
-               (increase-score-for-current-player!)
+               (increase-score-for-player! @current-player)
                (js/setTimeout #(hide-cards card id) 1000)
                (when (= (+ @player-one-score @player-two-score) number-of-different-cards)
                      (js/setTimeout
@@ -55,36 +55,34 @@
                                       :else "Ingen") " vandt!"
                                     )) 1500)))
              (do
-               (swap-player!)
+               (swap-player! @current-player)
                (js/setTimeout #(flip-cards-back card id) 1000)))
            (reset! first-card nil)
            (swap! rounds inc)))
 
-(defn select-card [id]
-      (when (not (= @first-card id))
-            (if (not @first-card)
+(defn select-card [id firstcard]
+      (when (not (= firstcard id))
+            (if (not firstcard)
               (flip-first-card id)
               (flip-second-card id))))
 
 (defn base-skin [{:keys [id image transform classes] :as card} image-postfix]
       [:div {:class :col}
        [:div {:class    (into '(:flip-card) classes)
-              :on-click #(select-card id)}
+              :on-click #(select-card id @first-card)}
         [:div {:class :flip-card-inner :style {:transform transform}}
          [:div {:class :flip-card-front}
           [:img {:src (str "images/halloween-background" image-postfix ".png")}]]
          [:div {:class :flip-card-back}
           [:img {:src (str "images/halloween-" image image-postfix ".png")}]]]]])
 
-(def halloween-skin (fn [card] (base-skin card "")))
-
-(def halloween-skin-reversed (fn [card] (base-skin card "-reversed")))
+(defn halloween-skin [card] (base-skin card ""))
+(defn halloween-skin-reversed [card] (base-skin card "-reversed"))
+(def render-fns {:default  halloween-skin
+                 :reversed halloween-skin-reversed})
 
 (defn target-value [event]
       (.-value (.-target event)))
-
-(def render-fns {:default  halloween-skin
-                 :reversed halloween-skin-reversed})
 
 (defn control-panel []
       [:div {:class :control-area}
@@ -115,17 +113,17 @@
            [:td "Player 2"]
            [:td @player-two-score]]]]]])
 
-(defn render-cards [c]
-      (let [skin @current-skin]
-           (for [x (vals c)]
-                (do
-                  ^{:key (:id x)} [(get-in render-fns [skin]) x]))))
+(defn render-cards [c skin]
+     (for [x (vals c)]
+            ^{:key (:id x)} [(get-in render-fns [skin]) x])
+      #_(map #(^{:key (:id x)} (get-in render-fns [skin] %)) (vals c))
+      )
 
 (defn mini-app []
       [:div
        [:div {:style {:width :1110px :display :inline-block}}
         [:div {:class [:flip-card-container :flex-grid]}
-         (render-cards @cards)]]
+         (render-cards @cards @current-skin)]]
        [:div {:style {:display :inline-block :vertical-align :top :width :250px}}
         (control-panel)]
        ])
